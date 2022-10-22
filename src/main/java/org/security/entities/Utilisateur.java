@@ -7,18 +7,34 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
 @Setter
-@Entity @NoArgsConstructor @AllArgsConstructor
+@Entity
+@NoArgsConstructor
+@AllArgsConstructor
 public class Utilisateur {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long identifiant;
-    private String pseudonyme;
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    private String modePasse;
-    @ManyToOne
-    private Role role;
+    private Long id_utilisateur;
+
+    private String nom;
+
+    private String prenom;
+
+    private String email;
+
+    private String telephone;
+
+    private String role;
+
+    @OneToMany(
+            mappedBy = "utilisateur",
+            orphanRemoval = true,
+            cascade = CascadeType.ALL)
+    private List<Compte> comptes = new ArrayList<>();
+
 }

@@ -1,17 +1,31 @@
 package org.security.entities;
 
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+import javax.persistence.*;
+import java.util.List;
+
+@Getter
+@Setter
+@Entity
+@NoArgsConstructor
+@AllArgsConstructor
 public class Compte {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long identifiant;
 
-    private String email;
+    private String pseudonyme;
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 
-    private String telephone;
+    private String modePasse;
 
+    @ManyToOne(cascade = CascadeType.PERSIST)
+    @JoinColumn(name="id_utilisateur")
+    private Utilisateur utilisateur;
 }

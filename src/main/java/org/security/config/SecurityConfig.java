@@ -36,7 +36,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         // spécifier les authorisation sur les resource, c'est la technique classic ou on peut utiliser les annotation
         //http.authorizeRequests().antMatchers(HttpMethod.POST,"/users/**").hasAnyAuthority("ADMIN");
         //http.authorizeRequests().antMatchers(HttpMethod.GET,"/users/**").hasAnyAuthority("ADMIN");
-        http.authorizeRequests().antMatchers("/h2-console**", "/refreshToken/**", "/login/**").permitAll();
+        http.authorizeRequests().antMatchers("/h2console/**", "/refreshToken/**", "/login/**", "/createComptes/**").permitAll();
         http.formLogin();
         http.authorizeRequests().anyRequest().authenticated();
         // add filtre to config

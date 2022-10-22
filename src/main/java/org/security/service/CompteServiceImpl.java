@@ -1,4 +1,4 @@
-package org.security.service;
+/*package org.security.service;
 
 import org.security.entities.Role;
 import org.security.entities.Utilisateur;
@@ -45,7 +45,7 @@ public class CompteServiceImpl implements CompteService {
     }
 
     @Override
-    public Utilisateur loadUtilisateurByPseudonyme(String pseudonyme) {
+    public Utilisateur loadCompte(String pseudonyme) {
         return utilisateurRepository.findByPseudonyme(pseudonyme);
     }
 
@@ -54,3 +54,4 @@ public class CompteServiceImpl implements CompteService {
         return utilisateurRepository.findAll();
     }
 }
+*/

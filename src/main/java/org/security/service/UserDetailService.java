@@ -1,5 +1,6 @@
 package org.security.service;
 
+import org.security.entities.Compte;
 import org.security.entities.Utilisateur;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -24,13 +25,14 @@ public class UserDetailService implements UserDetailsService {
     }
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Utilisateur utilisateur = ICompteService.loadUtilisateurByPseudonyme(username).orElseThrow(
+    public UserDetails loadUserByUsername(String pseudonyme) throws UsernameNotFoundException {
+
+        Compte compte = ICompteService.loadCompteByPseudonyme(pseudonyme).orElseThrow(
                 () -> new UsernameNotFoundException(
-                        format("User: %s, not found", username)
+                        format("User: %s, not found", pseudonyme)
                 ));
         Collection<GrantedAuthority> authorities = new ArrayList<>();
-        authorities.add(new SimpleGrantedAuthority(utilisateur.getRole().getNom()));
-        return new User(utilisateur.getPseudonyme(), utilisateur.getModePasse(), authorities);
+        authorities.add(new SimpleGrantedAuthority(compte.getUtilisateur().getRole()));
+        return new User(compte.getPseudonyme(), compte.getModePasse(), authorities);
     }
 }

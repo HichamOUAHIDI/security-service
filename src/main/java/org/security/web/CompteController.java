@@ -1,62 +1,75 @@
 package org.security.web;
+
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.security.entities.Utilisateur;
+import org.security.entities.Compte;
 import org.security.service.ICompteService;
+import org.security.service.dto.CompteDto;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PostAuthorize;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.*;
+
+import static java.lang.String.format;
+
 @RestController
 public class CompteController {
     private final ICompteService ICompteService;
+
     public CompteController(ICompteService ICompteService) {
         this.ICompteService = ICompteService;
     }
-    @GetMapping( path = "/users",produces = MediaType.APPLICATION_JSON_VALUE)
+
+    @GetMapping(path = "/comptes")
     @PostAuthorize("hasAuthority('USER')")
-    public List<Utilisateur> listOfUtilisateur(){
-        return ICompteService.listUtilisateur();
+    public List<CompteDto>  listCompte() {
+        return ICompteService.listCompte();
     }
 
-    @PostMapping(path = "/users")
-    @PostAuthorize("hasAuthority('ADMIN')")
-    public Utilisateur save(@RequestBody Utilisateur utilisateur){
-        return ICompteService.ajouterUtilisateur(utilisateur);
+    @PostMapping(path = "/createComptes")
+    public Compte save(@RequestBody Compte compte) {
+        return ICompteService.ajouterCompteUtilisateur(compte);
     }
-    @GetMapping(path =  "/refreshToken")
+
+    @GetMapping(path = "/refreshToken")
     public void refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String authorizationToken = request.getHeader("Authorization");
-        if(Objects.nonNull(authorizationToken) && authorizationToken.startsWith("Bearer ")) {
+        if (Objects.nonNull(authorizationToken) && authorizationToken.startsWith("Bearer ")) {
             try {
                 String jwt = authorizationToken.substring(7);
                 Algorithm algorithm = Algorithm.HMAC256("my-secret-token-bricol");
                 JWTVerifier jwtVerifier = JWT.require(algorithm).build();
                 DecodedJWT decodedJWT = jwtVerifier.verify(jwt);
-                String username = decodedJWT.getSubject();
-                Utilisateur utilisateur = ICompteService.loadUtilisateurByPseudonyme(username).get();
-                String jwt_AccessToken= JWT.create()
-                        .withSubject(utilisateur.getPseudonyme())
+                String pseudonyme = decodedJWT.getSubject();
+                Compte compte = ICompteService.loadCompteByPseudonyme(pseudonyme).orElseThrow(
+                        () -> new UsernameNotFoundException(
+                                format("User: %s, not found", pseudonyme)
+                        ));
+
+                String jwt_AccessToken = JWT.create()
+                        .withSubject(compte.getPseudonyme())
                         //timeout courte
-                        .withExpiresAt(new Date(System.currentTimeMillis()+5*60*1000))
+                        .withExpiresAt(new Date(System.currentTimeMillis() + 5 * 60 * 1000))
                         .withIssuer(request.getRequestURL().toString())
-                        .withClaim("roles",utilisateur.getRole().getNom())
+                        .withClaim("roles", compte.getUtilisateur().getRole())
                         .sign(algorithm);
-                Map<String,String> idToken = new HashMap<>();
+                Map<String, String> idToken = new HashMap<>();
                 idToken.put("access-token", jwt_AccessToken);
                 idToken.put("refresh-token", jwt);
-                new ObjectMapper().writeValue(response.getOutputStream(),idToken);
+                new ObjectMapper().writeValue(response.getOutputStream(), idToken);
                 response.setContentType("application/json");
-            } catch (Exception e){
+            } catch (Exception e) {
                 response.setHeader("error-message", e.getMessage());
                 response.sendError(HttpServletResponse.SC_FORBIDDEN);
             }

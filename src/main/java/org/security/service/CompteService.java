@@ -1,13 +1,14 @@
 package org.security.service;
 
-import org.security.entities.Role;
-import org.security.entities.Utilisateur;
-import org.security.repository.RoleRepository;
-import org.security.repository.UtilisateurRepository;
+import org.security.entities.Compte;
+import org.security.repository.CompteRepository;
+import org.security.service.dto.CompteDto;
+import org.security.service.dto.Roles;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -15,43 +16,44 @@ import java.util.Optional;
 @Transactional
 public class CompteService implements ICompteService {
 
-    private final UtilisateurRepository utilisateurRepository;
-    private final RoleRepository roleRepository;
+    private final CompteRepository compteRepository;
 
     private final PasswordEncoder passwordEncoder;
 
-    public CompteService(UtilisateurRepository utilisateurRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder) {
-        this.utilisateurRepository = utilisateurRepository;
-        this.roleRepository = roleRepository;
+    public CompteService(CompteRepository compteRepository,  PasswordEncoder passwordEncoder) {
+        this.compteRepository = compteRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
     @Override
-    public Utilisateur ajouterUtilisateur(Utilisateur utilisateur) {
-        String passe = utilisateur.getModePasse();
-        utilisateur.setModePasse(passwordEncoder.encode(passe));
-        return utilisateurRepository.save(utilisateur);
+    @Transactional
+    public Compte ajouterCompteUtilisateur(Compte compte) {
+        compte.setModePasse(passwordEncoder.encode(compte.getModePasse()));
+        ajouterRoleToCompte(compte, Roles.USER.value());
+        return compteRepository.save(compte);
+    }
+
+
+    @Override
+    public void ajouterRoleToCompte(Compte compte, String nomRole) {
+        compte.getUtilisateur().setRole(nomRole);
     }
 
     @Override
-    public Role ajouterRole(Role role) {
-        return roleRepository.save(role);
+    public Optional<Compte> loadCompteByPseudonyme(String pseudonyme) {
+        return Optional.ofNullable(compteRepository.findByPseudonyme(pseudonyme));
     }
 
     @Override
-    public void ajouterRoleToUtilisateur(String pseudonyme, String nomRole) {
-        Optional<Utilisateur> utilisateur = loadUtilisateurByPseudonyme(pseudonyme);
-        Role role = roleRepository.findByNom(nomRole);
-        utilisateur.ifPresent(p -> p.setRole(role));
-    }
-
-    @Override
-    public Optional<Utilisateur> loadUtilisateurByPseudonyme(String pseudonyme) {
-        return Optional.ofNullable(utilisateurRepository.findByPseudonyme(pseudonyme));
-    }
-
-    @Override
-    public List<Utilisateur> listUtilisateur() {
-        return utilisateurRepository.findAll();
+    public List<CompteDto> listCompte() {
+        var comptes= compteRepository.findAll();
+        List<CompteDto> compteDtos = new ArrayList<>();
+        comptes.forEach(compte -> {
+            CompteDto compteDto = new CompteDto();
+            compteDto.setNom(compte.getUtilisateur().getNom());
+            compteDto.setPrenom(compte.getUtilisateur().getPrenom());
+            compteDtos.add(compteDto);
+        });
+        return compteDtos;
     }
 }

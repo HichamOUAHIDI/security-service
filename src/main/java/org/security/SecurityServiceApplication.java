@@ -1,6 +1,6 @@
 package org.security;
 
-import org.security.entities.Role;
+import org.security.entities.Compte;
 import org.security.entities.Utilisateur;
 import org.security.service.ICompteService;
 import org.springframework.boot.CommandLineRunner;
@@ -21,12 +21,24 @@ public class SecurityServiceApplication {
     @Bean
     CommandLineRunner start(ICompteService ICompteService) {
         return args -> {
-            ICompteService.ajouterRole(new Role(null, "USER"));
-            ICompteService.ajouterRole(new Role(null, "ADMIN"));
-            ICompteService.ajouterUtilisateur(new Utilisateur(null, "Hicham", "1234", null));
-            ICompteService.ajouterUtilisateur(new Utilisateur(null, "Ouahidi", "4321", null));
-			ICompteService.ajouterRoleToUtilisateur("Hicham","USER");
-            ICompteService.ajouterRoleToUtilisateur("Ouahidi","ADMIN");
+            Utilisateur utilisateur1 = new Utilisateur();
+            utilisateur1.setPrenom("Hicham");
+            utilisateur1.setNom("TEST");
+            Utilisateur utilisateur2 = new Utilisateur();
+            utilisateur2.setPrenom("OUAHIDI");
+            utilisateur2.setNom("TEST2");
+            Compte compte1 = new Compte();
+            compte1.setPseudonyme("pseudoHO");
+            compte1.setModePasse("1234");
+            Compte compte2 = new Compte();
+            compte2.setPseudonyme("pseudoOUA");
+            compte2.setModePasse("4321");
+            compte1.setUtilisateur(utilisateur1);
+            compte2.setUtilisateur(utilisateur2);
+            ICompteService.ajouterCompteUtilisateur(compte1);
+            ICompteService.ajouterCompteUtilisateur(compte2);
+			ICompteService.ajouterRoleToCompte(compte1,"USER");
+            ICompteService.ajouterRoleToCompte(compte2,"ADMIN");
         };
     }
     @Bean

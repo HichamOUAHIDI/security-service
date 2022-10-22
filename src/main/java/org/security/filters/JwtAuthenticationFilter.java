@@ -46,7 +46,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         String jwt_AccessToken= JWT.create()
                 .withSubject(user.getUsername())
                 //timeout courte
-                .withExpiresAt(new Date(System.currentTimeMillis()+1*60*1000))
+                .withExpiresAt(new Date(System.currentTimeMillis()+15*60*1000))
                 .withIssuer(request.getRequestURL().toString())
                 .withClaim("roles",user.getAuthorities()
                         .stream()

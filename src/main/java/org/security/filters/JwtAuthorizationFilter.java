@@ -24,7 +24,9 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
     // intercepteur springSecurty pour chaque requet passe par ce filtre avan le dispatcherServelet
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        if (request.getServletPath().equals("/refreshToken") || request.getServletPath().equals("/login")) {
+        if (request.getServletPath().equals("/refreshToken")
+                || request.getServletPath().equals("/login")
+                || request.getServletPath().equals("/createComptes")) {
             filterChain.doFilter(request, response);
         } else {
             String authorizationToken = request.getHeader("Authorization");
